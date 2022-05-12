@@ -32,23 +32,54 @@ url = 'https://opensea.io/rankings?sortBy=one_day_volume'
 
 print('start...')
 
-options = webdriver.FirefoxOptions()
-options.set_preference("general.useragent.override", f"{ua}")
-
-s = Service('geckodriver.exe')
-
-driver = webdriver.Firefox(service=s, options=options)
-
-driver.implicitly_wait(1.5)
-hhh = driver.get(url)
-# driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-
-time.sleep(3)
-html = driver.page_source
-
-# with requests.Session() as session:
-#     response = session.get(url=url, headers=headers)
+# # 1
+# #
+# options = webdriver.FirefoxOptions()
+# options.set_preference("general.useragent.override", f"{ua}")
 #
-# запись СПАРСЕНОЙ инфы в ХТМЛ-файл
-with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(html)
+# s = Service('geckodriver.exe')
+#
+# driver = webdriver.Firefox(service=s, options=options)
+#
+# driver.implicitly_wait(1.5)
+# hhh = driver.get(url)
+# # driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+#
+# time.sleep(3)
+# html = driver.page_source
+#
+#
+# #
+# # with requests.Session() as session:
+# #     response = session.get(url=url, headers=headers)
+# #
+# # запись СПАРСЕНОЙ инфы в ХТМЛ-файл
+# with open('index.html', 'w', encoding='utf-8') as file:
+#     file.write(html)
+
+# 2
+#
+#soup = BeautifulSoup(html, 'lxml')
+
+with open("index.html", "r", encoding='utf-8') as f:
+    source_html = f.read()
+
+soup = BeautifulSoup(source_html, 'lxml')
+
+"""
+в коде страницы есть скрипт:
+<script id="__NEXT_DATA__" ... </scrypt>
+
+в этом скрипте между тегами:
+"json": и "data: лежит готовый JSON с данными!!!
+
+...достаём его:
+"""
+script_all = soup.find('script', id='__NEXT_DATA__')
+script_ = str(re.findall('\"json\"\:\{\"data\"(.*?)\"data\"\:', str(script_all))).replace(",']", "").replace("['", "")
+json_all = '{"data"'+script_
+#scr1 = '{"data"'+ (str(re.findall('\"json\"\:\{\"data\"(.*?)\"data\"\:', str(script))).replace(",']", "").replace("['", ""))
+
+with open('_my_json.json.', 'w', encoding='utf-8') as file:
+    json.dump(json_all, file, indent=4, ensure_ascii=False)
+    #file.write(json_all)
